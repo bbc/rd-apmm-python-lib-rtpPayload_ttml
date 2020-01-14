@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class LengthError(Exception):
     '''
     Data is an invalid length.
@@ -18,11 +21,14 @@ class RTPPayload_TTML:
     def __init__(
        self,
        reserved: bytearray = bytearray(b'\x00\x00'),
-       userDataWords: str = ""):
+       userDataWords: str = "") -> None:
         self.reserved = reserved
         self.userDataWords = userDataWords
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, RTPPayload_TTML):
+            return NotImplemented
+
         return (
             (type(self) == type(other)) and
             (self.reserved == other.reserved) and
@@ -60,7 +66,7 @@ class RTPPayload_TTML:
         else:
             self._userDataWords = workingUDW
 
-    def fromBytearray(self, packet: bytearray) -> 'RTPPayload_TTML':
+    def fromBytearray(self, packet: bytearray) -> RTPPayload_TTML:
         '''
         Populate instance from a bytearray.
         '''
