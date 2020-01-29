@@ -9,5 +9,3 @@
 from .rtpPayload_ttml import RTPPayload_TTML, LengthError, SUPPORTED_ENCODINGS
 
 __all__ = ["RTPPayload_TTML", "LengthError", "SUPPORTED_ENCODINGS"]
-
-template = True
