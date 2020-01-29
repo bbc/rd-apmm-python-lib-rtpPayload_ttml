@@ -8,20 +8,25 @@
 
 from unittest import TestCase
 from hypothesis import given, strategies as st
-from rtpPayload_ttml import RTPPayload_TTML, LengthError
+from rtpPayload_ttml import RTPPayload_TTML, LengthError, SUPPORTED_ENCODINGS
 
 
 class TestExtension (TestCase):
     def setUp(self):
         self.thisP = RTPPayload_TTML()
 
-    @given(st.text().filter(lambda x: len(bytearray(x, "utf-8")) < 2**16))
-    def test_init(self, doc):
+    @given(st.tuples(
+        st.text(),
+        st.sampled_from(SUPPORTED_ENCODINGS)).filter(
+            lambda x: len(bytearray(x[0], x[1])) < 2**16))
+    def test_init(self, data):
+        doc, encoding = data
         reservedBits = bytearray(b'\x00\x00')
-        newP = RTPPayload_TTML(reservedBits, doc)
+        newP = RTPPayload_TTML(reservedBits, doc, encoding)
 
         self.assertEqual(newP.reserved, reservedBits)
         self.assertEqual(newP.userDataWords, doc)
+        self.assertEqual(newP._encoding, encoding)
 
     def test_reserved_default(self):
         self.assertEqual(self.thisP.reserved, bytearray(b'\x00\x00'))
@@ -53,6 +58,16 @@ class TestExtension (TestCase):
             doc += "a"
         with self.assertRaises(LengthError):
             self.thisP.userDataWords = doc
+
+    @given(st.tuples(
+        st.text(),
+        st.sampled_from(SUPPORTED_ENCODINGS)).filter(
+            lambda x: len(bytearray(x[0], x[1])) < 2**16))
+    def test_userDataWords_encodings(self, data):
+        doc, encoding = data
+        payload = RTPPayload_TTML(userDataWords=doc, encoding=encoding)
+        self.assertEqual(payload.userDataWords, doc)
+        self.assertEqual(payload._userDataWords, bytearray(doc, encoding))
 
     def test_eq(self):
         reservedBits = bytearray(b'\x00\x00')

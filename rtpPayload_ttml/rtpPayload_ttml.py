@@ -1,4 +1,15 @@
 from __future__ import annotations
+from encodings.aliases import aliases  # type: ignore
+
+
+SUPPORTED_ENCODINGS = [
+    "utf_8",
+    "utf-8",
+    "utf_8_sig",
+    "utf_16",
+    "utf_16_le",
+    "utf_16_be",
+    "utf-16"]
 
 
 class LengthError(Exception):
@@ -21,8 +32,17 @@ class RTPPayload_TTML:
     def __init__(
        self,
        reserved: bytearray = bytearray(b'\x00\x00'),
-       userDataWords: str = "") -> None:
+       userDataWords: str = "",
+       encoding: str = "utf-8") -> None:
+        self._userDataWords: bytearray
         self.reserved = reserved
+
+        if aliases.get(encoding, encoding) in SUPPORTED_ENCODINGS:
+            self._encoding = encoding
+        else:
+            raise ValueError("Encoding must be a valid python codec alias for "
+                             "utf-8 or utf-16")
+
         self.userDataWords = userDataWords
 
     def __eq__(self, other: object) -> bool:
@@ -32,7 +52,8 @@ class RTPPayload_TTML:
         return (
             (type(self) == type(other)) and
             (self.reserved == other.reserved) and
-            (self.userDataWords == other.userDataWords))
+            (self.userDataWords == other.userDataWords) and
+            (self._encoding == other._encoding))
 
     @property
     def reserved(self) -> bytearray:
@@ -50,13 +71,13 @@ class RTPPayload_TTML:
 
     @property
     def userDataWords(self) -> str:
-        return self._userDataWords.decode()
+        return self._userDataWords.decode(self._encoding)
 
     @userDataWords.setter
     def userDataWords(self, p: str) -> None:
         workingUDW = None
         if isinstance(p, str):
-            workingUDW = bytearray(p, "utf-8")
+            workingUDW = bytearray(p, self._encoding)
         else:
             raise AttributeError("userDataWords must be a str")
 
