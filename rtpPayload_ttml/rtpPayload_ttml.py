@@ -1,15 +1,5 @@
 from __future__ import annotations
-from encodings.aliases import aliases  # type: ignore
-
-
-SUPPORTED_ENCODINGS = [
-    "utf_8",
-    "utf-8",
-    "utf_8_sig",
-    "utf_16",
-    "utf_16_le",
-    "utf_16_be",
-    "utf-16"]
+from .utfUtils import SUPPORTED_ENCODINGS, utfEncode, utfDecode
 
 
 class LengthError(Exception):
@@ -27,21 +17,26 @@ class RTPPayload_TTML:
     Attributes:
         reserved (bytearray): The reserved bits. MUST be set to ``0``.
         userDataWords (str): The TTML document.
+        encoding (str): One of UTF-8, UTF-16, UTF-16LE, and UTF-16BE
+        bom (bool): Should encoded documents start with a byte-order mark
     '''
 
     def __init__(
        self,
        reserved: bytearray = bytearray(b'\x00\x00'),
        userDataWords: str = "",
-       encoding: str = "utf-8") -> None:
+       encoding: str = "UTF-8",
+       bom: bool = False) -> None:
         self._userDataWords: bytearray
-        self.reserved = reserved
 
-        if aliases.get(encoding, encoding) in SUPPORTED_ENCODINGS:
+        self.reserved = reserved
+        self._bom = bom
+
+        if encoding in SUPPORTED_ENCODINGS:
             self._encoding = encoding
         else:
-            raise ValueError("Encoding must be a valid python codec alias for "
-                             "utf-8 or utf-16")
+            raise AttributeError("Encoding must be one of {}".format(
+                "".join(SUPPORTED_ENCODINGS)))
 
         self.userDataWords = userDataWords
 
@@ -53,7 +48,8 @@ class RTPPayload_TTML:
             (type(self) == type(other)) and
             (self.reserved == other.reserved) and
             (self.userDataWords == other.userDataWords) and
-            (self._encoding == other._encoding))
+            (self._encoding == other._encoding) and
+            (self._bom == other._bom))
 
     @property
     def reserved(self) -> bytearray:
@@ -71,15 +67,11 @@ class RTPPayload_TTML:
 
     @property
     def userDataWords(self) -> str:
-        return self._userDataWords.decode(self._encoding)
+        return utfDecode(self._userDataWords, self._encoding)
 
     @userDataWords.setter
     def userDataWords(self, p: str) -> None:
-        workingUDW = None
-        if isinstance(p, str):
-            workingUDW = bytearray(p, self._encoding)
-        else:
-            raise AttributeError("userDataWords must be a str")
+        workingUDW = utfEncode(p, self._encoding, self._bom)
 
         if (len(workingUDW) >= 2**16):
             raise LengthError(
