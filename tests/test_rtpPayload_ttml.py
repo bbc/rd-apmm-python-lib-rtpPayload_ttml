@@ -8,7 +8,8 @@
 
 from unittest import TestCase
 from hypothesis import given, strategies as st
-from rtpPayload_ttml import RTPPayload_TTML, LengthError, SUPPORTED_ENCODINGS
+from rtpPayload_ttml import (RTPPayload_TTML, LengthError, SUPPORTED_ENCODINGS,
+                             utfEncode)
 
 
 class TestExtension (TestCase):
@@ -17,16 +18,28 @@ class TestExtension (TestCase):
 
     @given(st.tuples(
         st.text(),
-        st.sampled_from(SUPPORTED_ENCODINGS)).filter(
-            lambda x: len(bytearray(x[0], x[1])) < 2**16))
+        st.sampled_from(SUPPORTED_ENCODINGS),
+        st.booleans()).filter(
+            lambda x: len(utfEncode(x[0], x[1], x[2])) < 2**16))
     def test_init(self, data):
-        doc, encoding = data
+        doc, encoding, bom = data
         reservedBits = bytearray(b'\x00\x00')
-        newP = RTPPayload_TTML(reservedBits, doc, encoding)
+        newP = RTPPayload_TTML(reservedBits, doc, encoding, bom)
 
         self.assertEqual(newP.reserved, reservedBits)
         self.assertEqual(newP.userDataWords, doc)
         self.assertEqual(newP._encoding, encoding)
+        self.assertEqual(newP._bom, bom)
+
+    @given(
+        st.text(),
+        st.text().filter(lambda x: x not in SUPPORTED_ENCODINGS),
+        st.booleans())
+    def test_init_invalidEnc(self, doc, enc, bom):
+        reservedBits = bytearray(b'\x00\x00')
+
+        with self.assertRaises(AttributeError):
+            RTPPayload_TTML(reservedBits, doc, enc, bom)
 
     def test_reserved_default(self):
         self.assertEqual(self.thisP.reserved, bytearray(b'\x00\x00'))
@@ -43,7 +56,7 @@ class TestExtension (TestCase):
     def test_userDataWords_default(self):
         self.assertEqual(self.thisP.userDataWords, "")
 
-    @given(st.text().filter(lambda x: len(bytearray(x, "utf-8")) < 2**16))
+    @given(st.text().filter(lambda x: len(utfEncode(x, "UTF-8")) < 2**16))
     def test_userDataWords(self, doc):
         self.thisP.userDataWords = doc
         self.assertEqual(self.thisP.userDataWords, doc)
@@ -61,13 +74,15 @@ class TestExtension (TestCase):
 
     @given(st.tuples(
         st.text(),
-        st.sampled_from(SUPPORTED_ENCODINGS)).filter(
-            lambda x: len(bytearray(x[0], x[1])) < 2**16))
+        st.sampled_from(SUPPORTED_ENCODINGS),
+        st.booleans()).filter(
+            lambda x: len(utfEncode(x[0], x[1], x[2])) < 2**16))
     def test_userDataWords_encodings(self, data):
-        doc, encoding = data
-        payload = RTPPayload_TTML(userDataWords=doc, encoding=encoding)
+        doc, encoding, bom = data
+        payload = RTPPayload_TTML(
+            userDataWords=doc, encoding=encoding, bom=bom)
         self.assertEqual(payload.userDataWords, doc)
-        self.assertEqual(payload._userDataWords, bytearray(doc, encoding))
+        self.assertEqual(payload._userDataWords, utfEncode(doc, encoding, bom))
 
     def test_eq(self):
         reservedBits = bytearray(b'\x00\x00')
@@ -95,7 +110,7 @@ class TestExtension (TestCase):
     def test_toBytearray(self, doc):
         self.thisP.userDataWords = doc
 
-        bDoc = bytearray(doc, "utf-8")
+        bDoc = utfEncode(doc)
         expected = bytearray(2)
         expected += int(len(bDoc)).to_bytes(2, byteorder='big')
         expected += bDoc
@@ -106,7 +121,7 @@ class TestExtension (TestCase):
     def test_fromBytearray(self, doc):
         expected = RTPPayload_TTML(userDataWords=doc)
 
-        bDoc = bytearray(doc, "utf-8")
+        bDoc = utfEncode(doc)
         bArray = bytearray(2)
         bArray += int(len(bDoc)).to_bytes(2, byteorder='big')
         bArray += bDoc
