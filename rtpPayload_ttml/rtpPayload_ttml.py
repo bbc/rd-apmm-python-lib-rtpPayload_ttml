@@ -12,7 +12,7 @@ class LengthError(Exception):
 
 class RTPPayload_TTML:
     '''
-    A data structure for storing TTML RTP payloadsas defined by RFC XXXX.
+    A data structure for storing TTML RTP payloads as defined by RFC 8759.
 
     Attributes:
         reserved (bytearray): The reserved bits. MUST be set to ``0``.
@@ -60,8 +60,7 @@ class RTPPayload_TTML:
         if type(p) != bytearray:
             raise AttributeError("Payload value must be bytearray")
         if p != bytearray(b'\x00\x00'):
-            # TODO: Include RFC number in error
-            raise ValueError("Reserved bits must be '\x00\x00' under RFC XXXX")
+            raise ValueError("Reserved bits must be '\x00\x00' under RFC 8759")
         else:
             self._reserved = p
 
