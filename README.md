@@ -4,7 +4,7 @@ This python library provides a means to decode, encode, and interact with TTML R
 
 ## Example usage
 ```python
-from rtp import *
+from rtp import RTP, PayloadType, Extension
 from rtpPayload_ttml import RTPPayload_TTML
 from copy import deepcopy
 
@@ -17,7 +17,7 @@ baseRTP = RTP(
         ),
     csrcList=getCSRCList()
 )
-thisRTPBitstream = thisRTP.toBytearray()
+thisRTPBitstream = baseRTP.toBytearray()
 
 while runing:
     nextRTP = deepcopy(baseRTP)
