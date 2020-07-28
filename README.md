@@ -10,7 +10,7 @@ from copy import deepcopy
 
 baseRTP = RTP(
     marker=True,
-    payloadType=PayloadType.L16_2chan,
+    payloadType=PayloadType.DYNAMIC_96,
     extension=Extension(
         startBits=getExtStartBits(),
         headerExtension=getExtBody()
