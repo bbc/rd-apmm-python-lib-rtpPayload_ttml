@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from unittest import TestCase
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as st  # type: ignore
 from rtpPayload_ttml import (RTPPayload_TTML, LengthError, SUPPORTED_ENCODINGS,
                              utfEncode)
 
