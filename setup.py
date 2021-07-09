@@ -23,13 +23,16 @@ import os
 
 # Basic metadata
 name = 'rtpPayload_ttml'
-version = '0.0.0'
+version = '0.0.1'
 description = 'A library for decoding/encoding TTML RTP payloads'
 url = 'https://github.com/bbc/rd-apmm-python-lib-rtpPayload_ttml'
 author = u'James Sandford'
 author_email = u'james.sandford@bbc.co.uk'
-license = ''
-long_description = description
+license = 'apache-2.0'
+
+this_directory = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(this_directory, 'README.md')) as f:
+    long_description = f.read()
 
 
 def is_package(path):
@@ -76,4 +79,6 @@ setup(name=name,
       install_requires=packages_required,
       scripts=[],
       data_files=[],
-      long_description=long_description)
+      package_data={name: ['py.typed'] for name in package_names},
+      long_description=long_description,
+      long_description_content_type="text/markdown")
