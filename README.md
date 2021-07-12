@@ -2,6 +2,12 @@
 
 This python library provides a means to decode, encode, and interact with TTML RTP payloads as defined in [RFC 8759](https://datatracker.ietf.org/doc/rfc8759/). It is designed for use with an RTP library such as [RTP](https://github.com/bbc/rd-apmm-python-lib-rtp). It only encodes/decodes the payload bitstreams. It DOES NOT provide a means to render or edit TTML documents. It also doesn't provide any network functionality. To send these payloads over UDP, check out [rtpTTML](https://github.com/bbc/rd-apmm-python-lib-rtpTTML).
 
+## Installation
+
+```bash
+pip install rtpPayload-ttml
+```
+
 ## Example usage
 ```python
 from rtp import RTP, PayloadType, Extension
