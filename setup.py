@@ -26,8 +26,8 @@ name = 'rtpPayload_ttml'
 version = '0.0.1'
 description = 'A library for decoding/encoding TTML RTP payloads'
 url = 'https://github.com/bbc/rd-apmm-python-lib-rtpPayload_ttml'
-author = u'James Sandford'
-author_email = u'james.sandford@bbc.co.uk'
+author = u'BBC R&D'
+author_email = u'cloudfit-opensource@rd.bbc.co.uk'
 license = 'apache-2.0'
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
