@@ -23,7 +23,7 @@ import os
 
 # Basic metadata
 name = 'rtpPayload_ttml'
-version = '0.0.1'
+version = '0.0.2'
 description = 'A library for decoding/encoding TTML RTP payloads'
 url = 'https://github.com/bbc/rd-apmm-python-lib-rtpPayload_ttml'
 author = u'BBC R&D'
