@@ -59,7 +59,7 @@ class RTPPayload_TTML:
             return NotImplemented
 
         return (
-            (type(self) == type(other)) and
+            (type(self) is type(other)) and
             (self.reserved == other.reserved) and
             (self.userDataWords == other.userDataWords) and
             (self._encoding == other._encoding) and
@@ -71,7 +71,7 @@ class RTPPayload_TTML:
 
     @reserved.setter
     def reserved(self, p: bytearray) -> None:
-        if type(p) != bytearray:
+        if type(p) is not bytearray:
             raise AttributeError("Payload value must be bytearray")
         if p != bytearray(b'\x00\x00'):
             raise ValueError("Reserved bits must be '\x00\x00' under RFC 8759")
